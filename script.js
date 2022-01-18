@@ -40,15 +40,16 @@ function parallaxSection3() {
     const bg3_2 = document.querySelector("#bg3_2")
 
     let positionFromTop = document.querySelector("#section3").offsetTop
-    let startPos = positionFromTop //- navbar.offsetHeight
+    let startPos = positionFromTop - navbar.offsetHeight
 
     window.addEventListener("scroll", () => {
         let value = window.scrollY - positionFromTop
-        if (window.scrollY > startPos)
+        if (window.scrollY > positionFromTop)
             bg3_1.style.top = value * 0.8 + "px"
+        else
+            bg3_1.style.top = "0px"
         bg3_2.style.top = value * 0.7 + "px"
         bg3_2.style.left = -value * 0.6 + "px"
-
     })
 }
 
@@ -99,6 +100,8 @@ const lazyLoadingObserver = new IntersectionObserver(((entries, observer) => {
                     parallaxObserver.observe(document.querySelector("#section" + sectionId))
                     document.querySelectorAll(".text").forEach(e => blurObserver.observe(e))
 
+                    addToNav(document.querySelector("#title" + sectionId).innerHTML)
+
                 })
             }
         })
@@ -107,13 +110,32 @@ const lazyLoadingObserver = new IntersectionObserver(((entries, observer) => {
     }
 )
 
+function addToNav(name) {
+    let newItem = document.createElement("div")
+    newItem.classList.add("nav-item")
+    newItem.innerHTML = name
+    newItem.addEventListener("click", () => {
+        document.querySelector("." + name).scrollIntoView(true)
+    })
+    navbar.appendChild(newItem)
+}
+
+function setupNavScroll() {
+    let existing = document.querySelectorAll(".nav-item")
+    existing.forEach(item => {
+        item.addEventListener("click", () => {
+            document.querySelector("." + item.innerHTML).scrollIntoView(true)
+        })
+    })
+}
+
 const blurObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.remove("blur")
         else entry.target.classList.add("blur")
     })
 }, {
-    rootMargin: "-150px 0px -100px 0px"
+    rootMargin: "-250px 0px -200px 0px"
 })
 
 
@@ -122,3 +144,4 @@ window.onscroll = () => stickyNavbar()
 lazyLoadingObserver.observe(document.querySelector("#section1"))
 parallaxObserver.observe(document.querySelector("#section1"))
 document.querySelectorAll(".text").forEach(e => blurObserver.observe(e))
+setupNavScroll()
