@@ -101,6 +101,7 @@ const lazyLoadingObserver = new IntersectionObserver(((entries, observer) => {
                     document.querySelectorAll(".text").forEach(e => blurObserver.observe(e))
 
                     addToNav(document.querySelector("#title" + sectionId).innerHTML)
+                    locationObserver.observe(newSec)
 
                 })
             }
@@ -113,9 +114,12 @@ const lazyLoadingObserver = new IntersectionObserver(((entries, observer) => {
 function addToNav(name) {
     let newItem = document.createElement("div")
     newItem.classList.add("nav-item")
+    newItem.classList.add("nav-" + name)
     newItem.innerHTML = name
     newItem.addEventListener("click", () => {
+
         document.querySelector("." + name).scrollIntoView(true)
+        // document.querySelector(".nav-" + name).classList.add("currentSection")
     })
     navbar.appendChild(newItem)
 }
@@ -138,6 +142,18 @@ const blurObserver = new IntersectionObserver(entries => {
     rootMargin: "-250px 0px -200px 0px"
 })
 
+const locationObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            let sectionName = entry.target.querySelector("h3").innerHTML
+            document.querySelectorAll(".currentSection").forEach(i => i.classList.remove("currentSection"))
+            document.querySelector(".nav-" + sectionName).classList.add("currentSection")
+        }
+    })
+}, {
+    rootMargin: "-50% 0px -50% 0px"
+})
+
 
 // setup
 window.onscroll = () => stickyNavbar()
@@ -145,3 +161,4 @@ lazyLoadingObserver.observe(document.querySelector("#section1"))
 parallaxObserver.observe(document.querySelector("#section1"))
 document.querySelectorAll(".text").forEach(e => blurObserver.observe(e))
 setupNavScroll()
+locationObserver.observe(document.querySelector("#section1"))
