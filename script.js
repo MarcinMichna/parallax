@@ -1,13 +1,12 @@
 let navbar = document.querySelector("nav");
 let navbarOffset = navbar.offsetTop;
-
+let sectionCount = 4
 
 function stickyNavbar() {
-    if (window.scrollY >= navbarOffset) {
+    if (window.scrollY >= navbarOffset)
         navbar.classList.add("nav-sticky")
-    } else {
+    else
         navbar.classList.remove("nav-sticky");
-    }
 }
 
 function parallaxSection1() {
@@ -41,14 +40,15 @@ function parallaxSection3() {
     const bg3_2 = document.querySelector("#bg3_2")
 
     let positionFromTop = document.querySelector("#section3").offsetTop
-    let startPos = positionFromTop - navbar.offsetHeight
+    let startPos = positionFromTop //- navbar.offsetHeight
 
     window.addEventListener("scroll", () => {
         let value = window.scrollY - positionFromTop
         if (window.scrollY > startPos)
-            bg3_1.style.top = value * 0.6 + "px"
-        bg3_2.style.top = value * 0.8 + "px"
+            bg3_1.style.top = value * 0.8 + "px"
+        bg3_2.style.top = value * 0.7 + "px"
         bg3_2.style.left = -value * 0.6 + "px"
+
     })
 }
 
@@ -78,10 +78,47 @@ const parallaxObserver = new IntersectionObserver((entries) => {
     });
 });
 
+
+let loadedSections = 1
+const lazyLoadingObserver = new IntersectionObserver(((entries, observer) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting && loadedSections < sectionCount) {
+                let sectionId = loadedSections + 1
+                loadedSections += 1
+
+                console.log("Fetching section" + sectionId)
+                fetch("sections/section" + sectionId + ".html").then(r => r.text()).then(htmlString => {
+                    let html = new DOMParser().parseFromString(htmlString, "text/html")
+                    let newSection = html.querySelector("section")
+                    entry.target.parentElement.appendChild(newSection)
+
+                    let newSec = document.querySelector("#section" + sectionId)
+                    lazyLoadingObserver.unobserve(entry.target)
+                    lazyLoadingObserver.observe(newSec)
+
+                    parallaxObserver.observe(document.querySelector("#section" + sectionId))
+                    document.querySelectorAll(".text").forEach(e => blurObserver.observe(e))
+
+                })
+            }
+        })
+    }), {
+        rootMargin: "0px 0px -500px 0px"
+    }
+)
+
+const blurObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.remove("blur")
+        else entry.target.classList.add("blur")
+    })
+}, {
+    rootMargin: "-150px 0px -100px 0px"
+})
+
+
+// setup
+window.onscroll = () => stickyNavbar()
+lazyLoadingObserver.observe(document.querySelector("#section1"))
 parallaxObserver.observe(document.querySelector("#section1"))
-parallaxObserver.observe(document.querySelector("#section2"))
-parallaxObserver.observe(document.querySelector("#section3"))
-parallaxObserver.observe(document.querySelector("#section4"))
-
-
-window.onscroll = function() {stickyNavbar()};
+document.querySelectorAll(".text").forEach(e => blurObserver.observe(e))
